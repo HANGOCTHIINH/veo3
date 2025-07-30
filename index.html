@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nâng Cấp Prompt Video (Phiên bản Kỹ thuật)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-text: #ffffff;
+            --secondary-text: #e0e0e0;
+            --accent-color: #00e5ff;
+            --accent-hover: #84ffff;
+            --accent-2: #ff4081;
+            --card-bg: rgba(22, 22, 34, 0.65);
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --input-border: rgba(255, 255, 255, 0.2);
+            --input-focus-border: var(--accent-color);
+            --border-radius: 12px;
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            color: var(--primary-text);
+            line-height: 1.7;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        body::before {
+            content: ''; position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #161622; z-index: -2;
+        }
+
+        .aurora {
+            position: fixed; top: 50%; left: 50%;
+            border-radius: 50%; filter: blur(120px);
+            opacity: 0.4; z-index: -1;
+            animation: move 20s linear infinite;
+        }
+        .aurora-1 { width: 500px; height: 500px; background: var(--accent-color); transform: translate(-50%, -50%); animation-delay: 0s; }
+        .aurora-2 { width: 400px; height: 400px; background: var(--accent-2); animation-delay: -5s; }
+        .aurora-3 { width: 450px; height: 450px; background: #3f51b5; animation-delay: -10s; }
+
+        @keyframes move {
+            0%, 100% { transform: translate(-60%, -60%) rotate(0deg) scale(1.2); }
+            25% { transform: translate(60%, -40%) rotate(90deg) scale(0.8); }
+            50% { transform: translate(40%, 60%) rotate(180deg) scale(1.1); }
+            75% { transform: translate(-50%, 40%) rotate(270deg) scale(0.9); }
+        }
+
+        .container {
+            max-width: 1200px; margin: 20px auto;
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 30px; background: var(--card-bg);
+            padding: 30px; border-radius: var(--border-radius);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: var(--shadow); position: relative; z-index: 1;
+        }
+
+        header { grid-column: 1 / -1; text-align: center; margin-bottom: 10px; }
+        header h1 { font-size: 2.5rem; font-weight: 700; color: var(--primary-text); text-shadow: 0 0 15px var(--accent-color); }
+
+        .input-column, .output-column { padding: 15px; display: flex; flex-direction: column; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--secondary-text); }
+        
+        .label-with-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .link-btn { background: none; border: none; color: var(--accent-color); cursor: pointer; font-size: 0.9rem; text-decoration: underline; padding: 0; transition: color 0.3s; }
+        .link-btn:hover { color: var(--accent-hover); }
+
+        .form-group input[type="password"], .form-group select, .form-group textarea {
+            width: 100%; padding: 14px;
+            border: 1px solid var(--input-border); border-radius: var(--border-radius);
+            background-color: var(--input-bg); color: var(--primary-text);
+            font-size: 1rem; font-family: 'Be Vietnam Pro', sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:disabled { background-color: rgba(0,0,0,0.4); cursor: not-allowed; }
+        .form-group *:focus {
+            outline: none; border-color: var(--input-focus-border);
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+        .form-group textarea { resize: vertical; }
+        #image-prompt { min-height: 200px; }
+        #dialogue { min-height: 80px; }
+
+        .btn {
+            width: 100%; padding: 15px;
+            color: var(--primary-text); border: none;
+            border-radius: var(--border-radius); font-size: 1.2rem;
+            font-weight: 700; cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, var(--accent-color), var(--accent-hover));
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.4);
+            color: #111;
+        }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0, 229, 255, 0.6); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-primary:disabled { background: #555; cursor: not-allowed; box-shadow: none; color: var(--primary-text); }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, var(--accent-2), #ff80ab);
+            box-shadow: 0 4px 15px rgba(255, 64, 129, 0.4);
+        }
+        .btn-secondary:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(255, 64, 129, 0.6); }
+
+        .output-column h2 { color: var(--primary-text); margin-bottom: 15px; text-align: center; font-weight: 500; }
+        #result-wrapper { position: relative; flex-grow: 1; display: flex; flex-direction: column; }
+        #result { width: 100%; flex-grow: 1; background-color: var(--input-bg); border: 1px solid var(--input-border); border-radius: var(--border-radius); padding: 15px; color: var(--secondary-text); font-size: 1rem; white-space: pre-wrap; word-wrap: break-word; overflow-y: auto; min-height: 300px; }
+        
+        .result-actions { display: flex; gap: 10px; margin-top: 15px; }
+        #copy-btn { flex: 1; padding: 10px; font-size: 0.9rem; }
+
+        #history-section { margin-top: 20px; }
+        #history-section h3 { text-align: center; margin-bottom: 10px; font-weight: 500; }
+        #history-list { background: rgba(0,0,0,0.1); padding: 15px; border-radius: var(--border-radius); max-height: 250px; overflow-y: auto; }
+        
+        .history-item {
+            background: var(--input-bg);
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-item-content { cursor: pointer; flex-grow: 1; }
+        .history-item:hover { background-color: rgba(0, 229, 255, 0.2); }
+        .history-item p { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.9rem; }
+        .history-copy-btn {
+            background: none; border: none; cursor: pointer;
+            padding: 5px; margin-left: 10px;
+        }
+        .history-copy-btn svg { width: 18px; height: 18px; fill: var(--secondary-text); transition: fill 0.3s; }
+        .history-copy-btn:hover svg { fill: var(--accent-color); }
+
+        .loader { border: 5px solid rgba(255,255,255,0.2); border-top: 5px solid var(--accent-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 50px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .message { padding: 10px; border-radius: var(--border-radius); margin-top: 15px; text-align: center; }
+        .error { background-color: #ff4d4d; color: white; }
+        .info { background-color: var(--accent-2); color: white; }
+        
+        .hidden { display: none; }
+
+        @media (max-width: 992px) { .container { grid-template-columns: 1fr; margin: 10px auto; } header h1 { font-size: 2rem; } }
+        @media (max-width: 576px) { body { padding: 10px; } .container { padding: 15px; } }
+    </style>
+</head>
+<body>
+    <div class="aurora aurora-1"></div>
+    <div class="aurora aurora-2"></div>
+    <div class="aurora aurora-3"></div>
+
+    <div class="container">
+        <header><h1>Nâng Cấp Prompt Video (Kỹ thuật)</h1></header>
+
+        <div class="input-column">
+            <form id="prompt-form">
+                <div class="form-group">
+                    <label for="image-prompt">Prompt tạo ảnh gốc (Có thể văn hoa):</label>
+                    <textarea id="image-prompt" name="image-prompt" placeholder="Dán prompt tạo ảnh của bạn vào đây..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="dialogue">Thoại nhân vật (tiếng Việt):</label>
+                    <textarea id="dialogue" name="dialogue" placeholder="Ví dụ: 'Đợi đã, đó là gì vậy?'"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="duration">Thời lượng cảnh quay:</label>
+                    <select id="duration" name="duration">
+                        <option value="short (~5 seconds)">Ngắn (~5s)</option>
+                        <option value="medium (~10 seconds)">Trung bình (~10s)</option>
+                        <option value="long (~15 seconds)">Dài (~15s)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div class="label-with-action">
+                        <label for="api-key">API Key của Gemini</label>
+                        <button type="button" id="change-api-key-btn" class="link-btn hidden">Thay đổi</button>
+                    </div>
+                    <input type="password" id="api-key" name="api-key" placeholder="Nhập và lưu API Key của bạn">
+                </div>
+                <button type="submit" class="btn btn-primary">Phân tích & Tạo Prompt Video</button>
+                <div id="form-message" class="message hidden"></div>
+            </form>
+        </div>
+
+        <div class="output-column">
+            <h2>Prompt Video Kỹ thuật:</h2>
+            <div id="main-loader" class="loader hidden"></div>
+            <div id="result-wrapper">
+                <div id="result">Prompt video sẽ xuất hiện ở đây...</div>
+                <div class="result-actions hidden">
+                    <button id="copy-btn" class="btn btn-secondary">Sao chép</button>
+                </div>
+            </div>
+            <div id="history-section" class="hidden">
+                <div class="label-with-action">
+                    <h3>Lịch sử Sáng tạo</h3>
+                    <button id="clear-history-btn" class="link-btn">Xóa lịch sử</button>
+                </div>
+                <div id="history-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const promptForm = document.getElementById('prompt-form');
+            const mainLoader = document.getElementById('main-loader');
+            const resultDiv = document.getElementById('result');
+            const resultWrapper = document.getElementById('result-wrapper');
+            const resultActions = document.querySelector('.result-actions');
+            const copyBtn = document.getElementById('copy-btn');
+            const apiKeyInput = document.getElementById('api-key');
+            const formMessage = document.getElementById('form-message');
+            const changeApiKeyBtn = document.getElementById('change-api-key-btn');
+            
+            const historySection = document.getElementById('history-section');
+            const historyList = document.getElementById('history-list');
+            const clearHistoryBtn = document.getElementById('clear-history-btn');
+
+            loadApiKey();
+            loadAndRenderHistory();
+
+            promptForm.addEventListener('submit', handleFormSubmit);
+            copyBtn.addEventListener('click', copyToClipboard);
+            changeApiKeyBtn.addEventListener('click', enableApiKeyChange);
+            clearHistoryBtn.addEventListener('click', clearHistory);
+
+            function loadApiKey() {
+                const savedKey = localStorage.getItem('geminiApiKey');
+                if (savedKey) {
+                    apiKeyInput.value = savedKey;
+                    apiKeyInput.disabled = true;
+                    changeApiKeyBtn.classList.remove('hidden');
+                }
+            }
+
+            function enableApiKeyChange() {
+                localStorage.removeItem('geminiApiKey');
+                apiKeyInput.value = '';
+                apiKeyInput.disabled = false;
+                apiKeyInput.placeholder = 'Nhập API Key mới và nhấn nút để lưu';
+                apiKeyInput.focus();
+                changeApiKeyBtn.classList.add('hidden');
+                displayMessage('Bạn có thể nhập API Key mới.', 'info');
+            }
+            
+            function getApiKey() {
+                const apiKey = apiKeyInput.value.trim();
+                 if (!apiKey) {
+                    displayMessage('Vui lòng cung cấp API Key của Gemini.', 'error');
+                    return null;
+                }
+                if (!localStorage.getItem('geminiApiKey')) {
+                    localStorage.setItem('geminiApiKey', apiKey);
+                    apiKeyInput.disabled = true;
+                    changeApiKeyBtn.classList.remove('hidden');
+                }
+                return apiKey;
+            }
+
+            async function handleFormSubmit(e) {
+                e.preventDefault();
+                const apiKey = getApiKey();
+                if (!apiKey) return;
+
+                const formData = {
+                    imagePrompt: document.getElementById('image-prompt').value.trim(),
+                    dialogue: document.getElementById('dialogue').value.trim(),
+                    duration: document.getElementById('duration').value
+                };
+
+                if (!formData.imagePrompt) {
+                    displayMessage('Vui lòng nhập prompt tạo ảnh.', 'error');
+                    return;
+                }
+
+                const userPrompt = `Act as a hyper-detailed technical director and cinematographer for an AI video generator. Your task is to deconstruct a potentially literary or vague image prompt and rebuild it into an extremely specific, technical, and non-literary video prompt.
+
+                **Core Objective: Maximum Detail. Zero Ambiguity. No Poetic Language.**
+                
+                **Instructions:**
+                1.  **Deconstruct Input:** Analyze the original prompt to identify the core subject, setting, and artistic style.
+                2.  **Hyper-Detailed Subject Description:**
+                    * **Character:** Detail their clothing (e.g., "worn leather jacket with cracked seams," "a silk dress that ripples with movement"), their physical features (e.g., "a small scar above the left eyebrow," "freckles scattered across the nose"), their exact facial expression ("a subtle frown of concentration, lips slightly pursed"), and their posture ("shoulders slumped in exhaustion").
+                    * **Action/Movement:** Detail the precise mechanics of the action. Not "walking," but "walking with a determined, fast-paced stride, arms swinging slightly." If they speak, describe the mouth movement: "their lips form the words 'Cứu tôi với'".
+                3.  **Hyper-Detailed Environment Description:**
+                    * Describe textures ("rough concrete wall with peeling paint," "polished marble floor reflecting the overhead lights"), specific objects ("a half-empty coffee cup on the table, steam slowly rising"), and atmospheric conditions ("thick fog clings to the ground," "pollen particles drift in the afternoon sun").
+                4.  **Precise Dynamic & Camera Instructions:**
+                    * **Camera:** Specify lens and shot type (e.g., "35mm lens, wide shot," "85mm lens, extreme close-up").
+                    * **Movement:** Describe the exact camera movement path (e.g., "Starts as a wide shot, then a slow dolly-in that ends on a close-up of the character's hands.").
+                    * **Lighting:** Describe the light source, quality, and color (e.g., "harsh, direct overhead sunlight creating hard shadows," "soft, diffused light from an overcast sky").
+                5.  **Final Output Format:**
+                    * Combine all details into a dense, comma-separated string of English keywords and phrases.
+                    * Vietnamese dialogue must be preserved exactly as provided and enclosed in double quotes.
+                    * The output must be ONLY the prompt string. Do not add any introductory text or explanations.
+                
+                **Input Information:**
+                - **Original Image Prompt:** "${formData.imagePrompt}"
+                - **Character Dialogue (Vietnamese):** "${formData.dialogue || 'No dialogue'}"
+                - **Desired Duration:** ${formData.duration}
+                
+                Create the new, hyper-detailed technical prompt.`;
+                
+                showMainLoading(true);
+                displayMessage('', 'clear');
+
+                try {
+                    const generatedPrompt = await callGeminiApi(userPrompt, apiKey);
+                    displayResult(generatedPrompt);
+                    savePromptToHistory(formData, generatedPrompt);
+                } catch (error) {
+                    displayMessage(`Đã xảy ra lỗi: ${error.message}. Hãy kiểm tra lại API Key.`, 'error');
+                    displayResult('Không thể tạo prompt do có lỗi xảy ra.');
+                } finally {
+                    showMainLoading(false);
+                }
+            }
+
+            async function callGeminiApi(prompt, apiKey) {
+                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                
+                const requestBody = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
+                    ]
+                };
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || `Lỗi HTTP: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0].content) {
+                     return data.candidates[0].content.parts[0].text;
+                } else {
+                    if (data.candidates && data.candidates[0].finishReason === 'SAFETY') {
+                         throw new Error('Prompt đã bị chặn vì lý do an toàn.');
+                    }
+                    throw new Error('Không nhận được nội dung hợp lệ từ API.');
+                }
+            }
+            
+            function getHistory() {
+                return JSON.parse(localStorage.getItem('videoPromptHistory')) || [];
+            }
+
+            function savePromptToHistory(formData, generatedPrompt) {
+                let history = getHistory();
+                const historyEntry = {
+                    formData: formData,
+                    generatedPrompt: generatedPrompt,
+                    timestamp: new Date().getTime()
+                };
+                history.unshift(historyEntry);
+                if (history.length > 20) { history.pop(); }
+                localStorage.setItem('videoPromptHistory', JSON.stringify(history));
+                loadAndRenderHistory();
+            }
+
+            function loadAndRenderHistory() {
+                let history = getHistory();
+                historyList.innerHTML = '';
+                if (history.length > 0) {
+                    historySection.classList.remove('hidden');
+                    history.forEach(entry => {
+                        const item = document.createElement('div');
+                        item.className = 'history-item';
+                        item.innerHTML = `
+                            <div class="history-item-content">
+                                <p>${entry.formData.imagePrompt.substring(0, 60)}...</p>
+                            </div>
+                            <button class="history-copy-btn" title="Sao chép prompt này">
+                                <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path></svg>
+                            </button>
+                        `;
+                        item.querySelector('.history-item-content').onclick = () => loadPromptFromHistory(entry);
+                        item.querySelector('.history-copy-btn').onclick = (e) => {
+                            e.stopPropagation();
+                            copyToClipboard(entry.generatedPrompt);
+                        };
+                        historyList.appendChild(item);
+                    });
+                } else {
+                    historySection.classList.add('hidden');
+                }
+            }
+
+            function loadPromptFromHistory(entry) {
+                document.getElementById('image-prompt').value = entry.formData.imagePrompt || '';
+                document.getElementById('dialogue').value = entry.formData.dialogue || '';
+                document.getElementById('duration').value = entry.formData.duration || 'short (~5 seconds)';
+                displayResult(entry.generatedPrompt);
+                window.scrollTo(0, 0);
+            }
+
+            function clearHistory() {
+                if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử?')) {
+                    localStorage.removeItem('videoPromptHistory');
+                    loadAndRenderHistory();
+                }
+            }
+
+            function copyToClipboard(text = null) {
+                const textToCopy = text || resultDiv.innerText;
+                if (!textToCopy || textToCopy.startsWith('Prompt')) return;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    displayMessage('Đã sao chép vào clipboard!', 'info');
+                }).catch(err => {
+                    displayMessage('Lỗi khi sao chép.', 'error');
+                });
+            }
+
+            function showMainLoading(isLoading) {
+                mainLoader.classList.toggle('hidden', !isLoading);
+                resultWrapper.classList.toggle('hidden', isLoading);
+            }
+
+            function displayResult(text) {
+                resultDiv.innerText = text;
+                resultActions.classList.remove('hidden');
+            }
+
+            function displayMessage(message, type) {
+                formMessage.className = `message ${type}`;
+                formMessage.innerText = message;
+                setTimeout(() => {
+                    formMessage.classList.add('hidden');
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
