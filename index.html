@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nâng Cấp Prompt Video (Phiên bản Kỹ thuật)</title>
+    <title>Nâng Cấp Prompt Video (Phiên bản Đạo diễn AI)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -14,6 +14,7 @@
             --accent-color: #00e5ff;
             --accent-hover: #84ffff;
             --accent-2: #ff4081;
+            --accent-3: #3f51b5;
             --card-bg: rgba(22, 22, 34, 0.65);
             --input-bg: rgba(0, 0, 0, 0.3);
             --input-border: rgba(255, 255, 255, 0.2);
@@ -48,7 +49,7 @@
         }
         .aurora-1 { width: 500px; height: 500px; background: var(--accent-color); transform: translate(-50%, -50%); animation-delay: 0s; }
         .aurora-2 { width: 400px; height: 400px; background: var(--accent-2); animation-delay: -5s; }
-        .aurora-3 { width: 450px; height: 450px; background: #3f51b5; animation-delay: -10s; }
+        .aurora-3 { width: 450px; height: 450px; background: var(--accent-3); animation-delay: -10s; }
 
         @keyframes move {
             0%, 100% { transform: translate(-60%, -60%) rotate(0deg) scale(1.2); }
@@ -92,8 +93,8 @@
             box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
         }
         .form-group textarea { resize: vertical; }
-        #image-prompt { min-height: 200px; }
-        #dialogue { min-height: 80px; }
+        #image-prompt { min-height: 150px; }
+        #dialogue, #negative-prompt { min-height: 80px; }
 
         .btn {
             width: 100%; padding: 15px;
@@ -119,32 +120,29 @@
 
         .output-column h2 { color: var(--primary-text); margin-bottom: 15px; text-align: center; font-weight: 500; }
         #result-wrapper { position: relative; flex-grow: 1; display: flex; flex-direction: column; }
-        #result { width: 100%; flex-grow: 1; background-color: var(--input-bg); border: 1px solid var(--input-border); border-radius: var(--border-radius); padding: 15px; color: var(--secondary-text); font-size: 1rem; white-space: pre-wrap; word-wrap: break-word; overflow-y: auto; min-height: 300px; }
+        #result { width: 100%; flex-grow: 1; background-color: var(--input-bg); border: 1px solid var(--input-border); border-radius: var(--border-radius); padding: 15px; color: var(--secondary-text); font-size: 1rem; white-space: pre-wrap; word-wrap: break-word; overflow-y: auto; min-height: 250px; }
         
-        .result-actions { display: flex; gap: 10px; margin-top: 15px; }
-        #copy-btn { flex: 1; padding: 10px; font-size: 0.9rem; }
+        .result-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        #copy-btn, #explain-prompt-btn, #suggest-audio-btn, #suggest-shots-btn { flex: 1; padding: 10px; font-size: 0.9rem; min-width: 150px; }
+
+        .extra-section { margin-top: 20px; }
+        .extra-section h3 { text-align: center; margin-bottom: 10px; font-weight: 500; }
+        .extra-section-content { background: rgba(0,0,0,0.1); padding: 15px; border-radius: var(--border-radius); white-space: pre-wrap; word-wrap: break-word; font-size: 0.95rem; }
 
         #history-section { margin-top: 20px; }
         #history-section h3 { text-align: center; margin-bottom: 10px; font-weight: 500; }
         #history-list { background: rgba(0,0,0,0.1); padding: 15px; border-radius: var(--border-radius); max-height: 250px; overflow-y: auto; }
         
         .history-item {
-            background: var(--input-bg);
-            padding: 10px 15px;
-            margin-bottom: 10px;
-            border-radius: var(--border-radius);
-            transition: all 0.3s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: var(--input-bg); padding: 10px 15px;
+            margin-bottom: 10px; border-radius: var(--border-radius);
+            transition: all 0.3s ease; display: flex;
+            justify-content: space-between; align-items: center;
         }
         .history-item-content { cursor: pointer; flex-grow: 1; }
         .history-item:hover { background-color: rgba(0, 229, 255, 0.2); }
         .history-item p { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.9rem; }
-        .history-copy-btn {
-            background: none; border: none; cursor: pointer;
-            padding: 5px; margin-left: 10px;
-        }
+        .history-copy-btn { background: none; border: none; cursor: pointer; padding: 5px; margin-left: 10px; }
         .history-copy-btn svg { width: 18px; height: 18px; fill: var(--secondary-text); transition: fill 0.3s; }
         .history-copy-btn:hover svg { fill: var(--accent-color); }
 
@@ -153,7 +151,7 @@
 
         .message { padding: 10px; border-radius: var(--border-radius); margin-top: 15px; text-align: center; }
         .error { background-color: #ff4d4d; color: white; }
-        .info { background-color: var(--accent-2); color: white; }
+        .info { background-color: var(--accent-3); color: white; }
         
         .hidden { display: none; }
 
@@ -167,17 +165,21 @@
     <div class="aurora aurora-3"></div>
 
     <div class="container">
-        <header><h1>Nâng Cấp Prompt Video (Kỹ thuật)</h1></header>
+        <header><h1>Trợ lý Đạo diễn AI</h1></header>
 
         <div class="input-column">
             <form id="prompt-form">
                 <div class="form-group">
-                    <label for="image-prompt">Prompt tạo ảnh gốc (Có thể văn hoa):</label>
-                    <textarea id="image-prompt" name="image-prompt" placeholder="Dán prompt tạo ảnh của bạn vào đây..."></textarea>
+                    <label for="image-prompt">Ý tưởng cảnh quay (Có thể văn hoa):</label>
+                    <textarea id="image-prompt" name="image-prompt" placeholder="Dán prompt tạo ảnh hoặc mô tả ý tưởng của bạn vào đây..."></textarea>
                 </div>
                 <div class="form-group">
                     <label for="dialogue">Thoại nhân vật (tiếng Việt):</label>
-                    <textarea id="dialogue" name="dialogue" placeholder="Ví dụ: 'Đợi đã, đó là gì vậy?'"></textarea>
+                    <textarea id="dialogue" name="dialogue" placeholder="Ví dụ: 'Chúng ta phải đi thôi.'"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="negative-prompt">Prompt Phủ định (Những gì KHÔNG muốn thấy):</label>
+                    <textarea id="negative-prompt" name="negative-prompt" placeholder="Ví dụ: xấu xí, biến dạng, màu sắc lòe loẹt, máy quay rung lắc"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="duration">Thời lượng cảnh quay:</label>
@@ -206,7 +208,25 @@
                 <div id="result">Prompt video sẽ xuất hiện ở đây...</div>
                 <div class="result-actions hidden">
                     <button id="copy-btn" class="btn btn-secondary">Sao chép</button>
+                    <button id="explain-prompt-btn" class="btn btn-primary">✨ Giải thích Prompt</button>
+                    <button id="suggest-audio-btn" class="btn btn-secondary">✨ Gợi ý Âm thanh</button>
+                    <button id="suggest-shots-btn" class="btn btn-primary">✨ Gợi ý Cảnh quay</button>
                 </div>
+            </div>
+            <div id="explanation-section" class="extra-section hidden">
+                <h3>Giải thích Kỹ thuật:</h3>
+                <div id="explanation-loader" class="loader hidden"></div>
+                <div id="explanation-result" class="extra-section-content"></div>
+            </div>
+            <div id="audio-suggestion-section" class="extra-section hidden">
+                <h3>Gợi ý Âm thanh & Nhạc nền:</h3>
+                <div id="audio-suggestion-loader" class="loader hidden"></div>
+                <div id="audio-suggestion-result" class="extra-section-content"></div>
+            </div>
+            <div id="shots-suggestion-section" class="extra-section hidden">
+                <h3>Gợi ý Cảnh quay tiếp theo:</h3>
+                <div id="shots-suggestion-loader" class="loader hidden"></div>
+                <div id="shots-suggestion-result" class="extra-section-content"></div>
             </div>
             <div id="history-section" class="hidden">
                 <div class="label-with-action">
@@ -220,6 +240,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Element Selection ---
             const promptForm = document.getElementById('prompt-form');
             const mainLoader = document.getElementById('main-loader');
             const resultDiv = document.getElementById('result');
@@ -230,18 +251,39 @@
             const formMessage = document.getElementById('form-message');
             const changeApiKeyBtn = document.getElementById('change-api-key-btn');
             
+            const explainPromptBtn = document.getElementById('explain-prompt-btn');
+            const explanationSection = document.getElementById('explanation-section');
+            const explanationLoader = document.getElementById('explanation-loader');
+            const explanationResultDiv = document.getElementById('explanation-result');
+
+            const suggestAudioBtn = document.getElementById('suggest-audio-btn');
+            const audioSuggestionSection = document.getElementById('audio-suggestion-section');
+            const audioSuggestionLoader = document.getElementById('audio-suggestion-loader');
+            const audioSuggestionResultDiv = document.getElementById('audio-suggestion-result');
+
+            const suggestShotsBtn = document.getElementById('suggest-shots-btn');
+            const shotsSuggestionSection = document.getElementById('shots-suggestion-section');
+            const shotsSuggestionLoader = document.getElementById('shots-suggestion-loader');
+            const shotsSuggestionResultDiv = document.getElementById('shots-suggestion-result');
+
             const historySection = document.getElementById('history-section');
             const historyList = document.getElementById('history-list');
             const clearHistoryBtn = document.getElementById('clear-history-btn');
 
+            // --- Initial Setup ---
             loadApiKey();
             loadAndRenderHistory();
 
+            // --- Event Listeners ---
             promptForm.addEventListener('submit', handleFormSubmit);
-            copyBtn.addEventListener('click', copyToClipboard);
+            copyBtn.addEventListener('click', () => copyToClipboard(resultDiv.innerText));
             changeApiKeyBtn.addEventListener('click', enableApiKeyChange);
             clearHistoryBtn.addEventListener('click', clearHistory);
+            explainPromptBtn.addEventListener('click', handleExplainPrompt);
+            suggestAudioBtn.addEventListener('click', handleSuggestAudio);
+            suggestShotsBtn.addEventListener('click', handleSuggestShots);
 
+            // --- Core Functions ---
             function loadApiKey() {
                 const savedKey = localStorage.getItem('geminiApiKey');
                 if (savedKey) {
@@ -283,11 +325,12 @@
                 const formData = {
                     imagePrompt: document.getElementById('image-prompt').value.trim(),
                     dialogue: document.getElementById('dialogue').value.trim(),
+                    negativePrompt: document.getElementById('negative-prompt').value.trim(),
                     duration: document.getElementById('duration').value
                 };
 
                 if (!formData.imagePrompt) {
-                    displayMessage('Vui lòng nhập prompt tạo ảnh.', 'error');
+                    displayMessage('Vui lòng nhập ý tưởng cảnh quay.', 'error');
                     return;
                 }
 
@@ -296,29 +339,29 @@
                 **Core Objective: Maximum Detail. Zero Ambiguity. No Poetic Language.**
                 
                 **Instructions:**
-                1.  **Deconstruct Input:** Analyze the original prompt to identify the core subject, setting, and artistic style.
-                2.  **Hyper-Detailed Subject Description:**
-                    * **Character:** Detail their clothing (e.g., "worn leather jacket with cracked seams," "a silk dress that ripples with movement"), their physical features (e.g., "a small scar above the left eyebrow," "freckles scattered across the nose"), their exact facial expression ("a subtle frown of concentration, lips slightly pursed"), and their posture ("shoulders slumped in exhaustion").
-                    * **Action/Movement:** Detail the precise mechanics of the action. Not "walking," but "walking with a determined, fast-paced stride, arms swinging slightly." If they speak, describe the mouth movement: "their lips form the words 'Cứu tôi với'".
-                3.  **Hyper-Detailed Environment Description:**
-                    * Describe textures ("rough concrete wall with peeling paint," "polished marble floor reflecting the overhead lights"), specific objects ("a half-empty coffee cup on the table, steam slowly rising"), and atmospheric conditions ("thick fog clings to the ground," "pollen particles drift in the afternoon sun").
-                4.  **Precise Dynamic & Camera Instructions:**
-                    * **Camera:** Specify lens and shot type (e.g., "35mm lens, wide shot," "85mm lens, extreme close-up").
-                    * **Movement:** Describe the exact camera movement path (e.g., "Starts as a wide shot, then a slow dolly-in that ends on a close-up of the character's hands.").
-                    * **Lighting:** Describe the light source, quality, and color (e.g., "harsh, direct overhead sunlight creating hard shadows," "soft, diffused light from an overcast sky").
-                5.  **Final Output Format:**
+                1.  **Deconstruct Input:** Analyze the original prompt to identify the core subject, setting, and artistic style. IGNORE any poetic or literary language, focusing only on the core concepts.
+                2.  **Hyper-Detailed Subject Description:** Detail their clothing (e.g., "worn leather jacket with cracked seams," "a silk dress that ripples with movement"), their physical features (e.g., "a small scar above the left eyebrow," "freckles scattered across the nose"), their exact facial expression ("a subtle frown of concentration, lips slightly pursed"), and their posture ("shoulders slumped in exhaustion").
+                3.  **Hyper-Detailed Action/Movement:** Detail the precise mechanics of the action. Not "walking," but "walking with a determined, fast-paced stride, arms swinging slightly." If they speak, describe the mouth movement: "their lips form the words 'Chúng ta phải đi thôi.'".
+                4.  **Hyper-Detailed Environment Description:** Describe textures ("rough concrete wall with peeling paint"), specific objects ("a half-empty coffee cup on the table, steam slowly rising"), and atmospheric conditions ("thick fog clings to the ground," "pollen particles drift in the afternoon sun").
+                5.  **Precise Dynamic & Camera Instructions:** Specify lens, shot type, and exact camera movement path (e.g., "35mm lens, starts as a wide shot, then a slow dolly-in that ends on a close-up of the character's hands."). Describe dynamic light ("flickering neon sign casts shifting red and blue light").
+                6.  **Final Output Format:**
                     * Combine all details into a dense, comma-separated string of English keywords and phrases.
                     * Vietnamese dialogue must be preserved exactly as provided and enclosed in double quotes.
+                    * If a negative prompt is provided, append it at the very end, starting with "--no" followed by English keywords.
                     * The output must be ONLY the prompt string. Do not add any introductory text or explanations.
                 
                 **Input Information:**
                 - **Original Image Prompt:** "${formData.imagePrompt}"
                 - **Character Dialogue (Vietnamese):** "${formData.dialogue || 'No dialogue'}"
+                - **Negative Prompt Concepts (to be translated to English keywords):** "${formData.negativePrompt || 'None'}"
                 - **Desired Duration:** ${formData.duration}
                 
                 Create the new, hyper-detailed technical prompt.`;
                 
                 showMainLoading(true);
+                explanationSection.classList.add('hidden');
+                audioSuggestionSection.classList.add('hidden');
+                shotsSuggestionSection.classList.add('hidden');
                 displayMessage('', 'clear');
 
                 try {
@@ -332,6 +375,101 @@
                     showMainLoading(false);
                 }
             }
+
+            async function handleExplainPrompt() {
+                const currentPrompt = resultDiv.innerText;
+                if (!currentPrompt || currentPrompt.startsWith('Prompt')) {
+                    displayMessage('Hãy tạo một prompt trước khi giải thích.', 'error');
+                    return;
+                }
+                const apiKey = getApiKey();
+                if (!apiKey) return;
+
+                explanationSection.classList.remove('hidden');
+                explanationLoader.classList.remove('hidden');
+                explanationResultDiv.innerHTML = '';
+                explainPromptBtn.disabled = true;
+
+                const userPrompt = `Act as a film professor. Analyze the following technical video prompt and explain the key cinematography and artistic terms in simple, easy-to-understand Vietnamese.
+
+                **Technical Prompt:**
+                "${currentPrompt}"
+
+                Provide the explanation in a clear, structured format.`;
+
+                try {
+                    const explanation = await callGeminiApi(userPrompt, apiKey);
+                    explanationResultDiv.innerText = explanation;
+                } catch (error) {
+                    explanationResultDiv.innerText = `Lỗi khi giải thích: ${error.message}`;
+                } finally {
+                    explanationLoader.classList.add('hidden');
+                    explainPromptBtn.disabled = false;
+                }
+            }
+
+            async function handleSuggestAudio() {
+                const currentPrompt = resultDiv.innerText;
+                if (!currentPrompt || currentPrompt.startsWith('Prompt')) {
+                    displayMessage('Hãy tạo một prompt trước khi gợi ý âm thanh.', 'error');
+                    return;
+                }
+                const apiKey = getApiKey();
+                if (!apiKey) return;
+
+                audioSuggestionSection.classList.remove('hidden');
+                audioSuggestionLoader.classList.remove('hidden');
+                audioSuggestionResultDiv.innerHTML = '';
+                suggestAudioBtn.disabled = true;
+
+                const userPrompt = `Act as a professional sound designer for a film. Based on the following video prompt, describe the complete soundscape for the scene. Include ambient sounds, specific sound effects (SFX), and a suggestion for the musical score/mood. Provide the description in Vietnamese.
+
+                **Video Prompt:**
+                "${currentPrompt}"`;
+
+                try {
+                    const audioCues = await callGeminiApi(userPrompt, apiKey);
+                    audioSuggestionResultDiv.innerText = audioCues;
+                } catch (error) {
+                    audioSuggestionResultDiv.innerText = `Lỗi khi gợi ý âm thanh: ${error.message}`;
+                } finally {
+                    audioSuggestionLoader.classList.add('hidden');
+                    suggestAudioBtn.disabled = false;
+                }
+            }
+            
+            async function handleSuggestShots() {
+                const currentPrompt = resultDiv.innerText;
+                if (!currentPrompt || currentPrompt.startsWith('Prompt')) {
+                    displayMessage('Hãy tạo một prompt trước khi gợi ý cảnh quay.', 'error');
+                    return;
+                }
+                const apiKey = getApiKey();
+                if (!apiKey) return;
+
+                shotsSuggestionSection.classList.remove('hidden');
+                shotsSuggestionLoader.classList.remove('hidden');
+                shotsSuggestionResultDiv.innerHTML = '';
+                suggestShotsBtn.disabled = true;
+
+                const userPrompt = `Based on the following detailed video prompt, act as a creative director and suggest 3 different, concise, and logical **next shots** that could follow this scene. Describe each shot as a short, actionable video prompt in English.
+
+                **Current Scene Prompt:**
+                "${currentPrompt}"
+
+                Provide the 3 suggestions in a numbered list.`;
+
+                try {
+                    const suggestions = await callGeminiApi(userPrompt, apiKey);
+                    shotsSuggestionResultDiv.innerText = suggestions;
+                } catch (error) {
+                    shotsSuggestionResultDiv.innerText = `Lỗi khi gợi ý: ${error.message}`;
+                } finally {
+                    shotsSuggestionLoader.classList.add('hidden');
+                    suggestShotsBtn.disabled = false;
+                }
+            }
+
 
             async function callGeminiApi(prompt, apiKey) {
                 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
@@ -395,7 +533,7 @@
                         const item = document.createElement('div');
                         item.className = 'history-item';
                         item.innerHTML = `
-                            <div class="history-item-content">
+                            <div class="history-item-content" title="Tải lại prompt này">
                                 <p>${entry.formData.imagePrompt.substring(0, 60)}...</p>
                             </div>
                             <button class="history-copy-btn" title="Sao chép prompt này">
@@ -417,6 +555,7 @@
             function loadPromptFromHistory(entry) {
                 document.getElementById('image-prompt').value = entry.formData.imagePrompt || '';
                 document.getElementById('dialogue').value = entry.formData.dialogue || '';
+                document.getElementById('negative-prompt').value = entry.formData.negativePrompt || '';
                 document.getElementById('duration').value = entry.formData.duration || 'short (~5 seconds)';
                 displayResult(entry.generatedPrompt);
                 window.scrollTo(0, 0);
@@ -429,10 +568,9 @@
                 }
             }
 
-            function copyToClipboard(text = null) {
-                const textToCopy = text || resultDiv.innerText;
-                if (!textToCopy || textToCopy.startsWith('Prompt')) return;
-                navigator.clipboard.writeText(textToCopy).then(() => {
+            function copyToClipboard(text) {
+                if (!text || text.startsWith('Prompt')) return;
+                navigator.clipboard.writeText(text).then(() => {
                     displayMessage('Đã sao chép vào clipboard!', 'info');
                 }).catch(err => {
                     displayMessage('Lỗi khi sao chép.', 'error');
